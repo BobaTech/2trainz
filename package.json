@@ -1,0 +1,18 @@
+{
+  "name": "2trainz",
+  "version": "1.0.0",
+  "description": "When trains collide",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/KwaiWan/2trainz.git"
+  },
+  "main": "app.js",
+  "author": "Alan Dai, Kevin Wang",
+  "bugs": {
+    "url": "https://github.com/KwaiWan/2trainz/issues"
+  },
+  "homepage": "https://github.com/KwaiWan/2trainz",
+  "dependencies": {
+    "express": "^4.13.1"
+  }
+}
