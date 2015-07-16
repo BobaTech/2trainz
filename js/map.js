@@ -1,18 +1,24 @@
 "use strict";
 
 var initialize = function() {
-	var minZoomLevel = 3;
+	var minZoomLevel = 5;
     var mapOptions = {
         center: { lat: 39.0, lng: -98 },
         zoom: minZoomLevel
     };
+    var map = new google.maps.Map(document.getElementById("map"), mapOptions);
+    map.data.loadGeoJson("data/casualties.geo.json");
+    map.data.loadGeoJson("data/us-railroads-10m.json");
+    
     var allowedBounds = new google.maps.LatLngBounds(
-    new google.maps.LatLng(39.368149, -65.915875), 
-    new google.maps.LatLng(39.368149, -127.798348)
+	    new google.maps.LatLng(32.314308, -126.067097), 
+	    new google.maps.LatLng(44.301400, -61.226309)
 	);
 	
 	google.maps.event.addListener(map, 'dragend', function() {
-	    if (allowedBounds.contains(map.getCenter())) return;
+	    if (allowedBounds.contains(map.getCenter())){
+	    	return;
+	    } 
 	    var center = map.getCenter(),
 	        x = center.lng(),
 	        y = center.lat(),
@@ -41,9 +47,6 @@ var initialize = function() {
 	});
 
     google.maps.visualRefresh = false;
-    var map = new google.maps.Map(document.getElementById("map"), mapOptions);
-    map.data.loadGeoJson("data/casualties.geo.json");
-    map.data.loadGeoJson("data/us-railroads-10m.json");
 };
 
 $(document).ready(function() {
