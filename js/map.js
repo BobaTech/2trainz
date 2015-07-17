@@ -1,4 +1,5 @@
 "use strict";
+var markerIcon = "css/ambulance.png";
 
 var initialize = function() {
 	var minZoomLevel = 5;
@@ -10,17 +11,20 @@ var initialize = function() {
     // map.data.loadGeoJson("data/casualties.geo.json");
     $.getJSON("data/casualties.geo.json", function(data) {
         var plotData = data.features.map(function(row, i) {
-            return new google.maps.Marker({"position": new google.maps.LatLng(row.geometry.coordinates[1], row.geometry.coordinates[0])})
+            return new google.maps.Marker({
+            	position: new google.maps.LatLng(row.geometry.coordinates[1], row.geometry.coordinates[0]),
+            	icon: markerIcon
+            })
         });
         var markerCluster = new MarkerClusterer(map, plotData);
     });
     map.data.loadGeoJson("data/us-railroads-10m.json");
     var allowedBounds = new google.maps.LatLngBounds(
 	    new google.maps.LatLng(32.314308, -126.067097), 
-	    new google.maps.LatLng(44.301400, -61.226309)
+	    new google.maps.LatLng(44.301400, -70.226309)
 	);
 	
-	google.maps.event.addListener(map, 'dragend', function() {
+	google.maps.event.addListener(map, 'drag', function() {
 	    if (allowedBounds.contains(map.getCenter())){
 	    	return;
 	    } 
@@ -48,7 +52,9 @@ var initialize = function() {
 	});
 	
 	google.maps.event.addListener(map, 'zoom_changed', function() {
-	   if (map.getZoom() < minZoomLevel) map.setZoom(minZoomLevel);
+	   if (map.getZoom() < minZoomLevel){
+	   	   map.setZoom(minZoomLevel);
+	   } 
 	});
 
     google.maps.visualRefresh = false;
