@@ -18,7 +18,12 @@ var initialize = function() {
         });
         var markerCluster = new MarkerClusterer(map, plotData);
     });
-    map.data.loadGeoJson("data/us-railroads-10m.json");
+    
+    $.getJSON("data/us-railroads-10m.json", function(us){
+		geoJsonObject = topojson.feature(us, us.object.railroads);
+		map.data.addGeoJson(geoJsonObject); 
+	}); 
+    //map.data.loadGeoJson("data/us-railroads-10m.json");
     var allowedBounds = new google.maps.LatLngBounds(
 	    new google.maps.LatLng(32.314308, -126.067097), 
 	    new google.maps.LatLng(44.301400, -70.226309)
@@ -65,10 +70,6 @@ $(document).ready(function() {
 });
 
 
-/*$.getJSON("data/us-railroads.json", function(data){
-	
-	var map = new google.maps.Map(document.getElementById("map"), mapOptions);
-	map.data.addGeoJson(geoJsonObject); 
-}); */
+
       
 
