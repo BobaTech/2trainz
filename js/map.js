@@ -1,5 +1,5 @@
 "use strict";
-var markerIcon = "css/ambulance.png";
+
 
 var initialize = function() {
 	var minZoomLevel = 5;
@@ -8,22 +8,29 @@ var initialize = function() {
         zoom: minZoomLevel
     };
     var map = new google.maps.Map(document.getElementById("map"), mapOptions);
-    // map.data.loadGeoJson("data/casualties.geo.json");
+    map.data.loadGeoJson("data/us-railroads-10m.json");
+    var point = new Array();
     $.getJSON("data/casualties.geo.json", function(data) {
-        var plotData = data.features.map(function(row, i) {
-            return new google.maps.Marker({
-            	position: new google.maps.LatLng(row.geometry.coordinates[1], row.geometry.coordinates[0]),
-            	icon: markerIcon
-            })
+    	//alert(point[0]);
+        var heatPoint = data.features.map(function(row, i) {
+            point.push(new google.maps.LatLng(row.geometry.coordinates[1], row.geometry.coordinates[0]));
+            //alert(point)
         });
-        var markerCluster = new MarkerClusterer(map, plotData);
-    });
+        //alert(point);
+        var pointArray = new google.maps.MVCArray(point);
+        var heatmap = new google.maps.visualization.HeatmapLayer({
+            data: pointArray
+        });
+        heatmap.setMap(map);
+	});
+        //var markerCluster = new MarkerClusterer(map, plotData);
+
     
-    $.getJSON("data/us-railroads-10m.json", function(us){
+    /*$.getJSON("data/us-railroads-10m.json", function(us){
 		geoJsonObject = topojson.feature(us, us.object.railroads);
 		map.data.addGeoJson(geoJsonObject); 
-	}); 
-    //map.data.loadGeoJson("data/us-railroads-10m.json");
+	}); */
+    
     var allowedBounds = new google.maps.LatLngBounds(
 	    new google.maps.LatLng(32.314308, -126.067097), 
 	    new google.maps.LatLng(44.301400, -70.226309)
