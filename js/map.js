@@ -51,7 +51,7 @@ var plot = function() {
 };
 
 var switchData = function(type) {
-    if(type === "casuatlies") {
+    if(type === "casualties") {
         currType = type;
         $.getJSON("data/casualties.geo.json", function(data) {
             var heatPoints = data.features.map(function(row, i) {
