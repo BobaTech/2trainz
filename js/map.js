@@ -1,53 +1,70 @@
 "use strict";
 
-var map, heatMap, currType = "casualties", casData, accData,
-    casualtyOptions = {
-        radius: 25,
-        gradient: {0.05: 'blue', 0.2: 'lime', 0.5: 'red'},
-        maxZoom: 11
-    },
+var map, heatMap, casData, accData, baseLayer, panelLayer, accLayer, casLayer, dmgLayer, fatLayer,
+    currYear = "2014",
     accidentOptions = {
-        radius: 25,
-        gradient: {0.05: 'blue', 0.2: 'lime', 0.5: 'red'},
-        maxZoom: 11
+        "radius": 25,
+        "maxZoom": 11,
+        "gradient": {0.4: "blue", 0.65: "lime", 1: "red"} 
+    },
+    casualtyOptions = {
+        "radius": 25,
+        "maxZoom": 11,
+        "gradient": {0.4: "blue", 0.65: "lime", 1: "red"}       
+    },
+    damageOptions = {
+        "radius": 25,
+        "maxZoom": 11,
+        "gradient": {0.4: "blue", 0.65: "lime", 1: "red"} 
+    },
+    fatalityOptions = {
+        "radius": 25,
+        "maxZoom": 11,
+        "gradient": {0.4: "blue", 0.65: "lime", 1: "red"} 
     };
     
-var southWest = L.latLng(32.314308, -126.067097),
-    northEast = L.latLng(44.301400, -61.226309),
-    bounds = L.latLngBounds(southWest, northEast);
+var southWest = new L.latLng(32.314308, -126.067097),
+    northEast = new L.latLng(44.301400, -61.226309),
+    bounds = new L.latLngBounds(southWest, northEast);
 
 var plot = function() {
-    var map = L.map("map", {
+    var map = new L.map("map", {
 	    maxBounds: bounds,
 	    maxZoom: 10,
 	    minZoom: 5
 	});
     map.setView([39.0, -98], 5);
-    L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
+    baseLayer = new L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
         id: "cakesofwrath.5eddf8f1",
         accessToken: "pk.eyJ1IjoiY2FrZXNvZndyYXRoIiwiYSI6Ijk5YWI3OTlhMGIxN2I1OWYzYjhlOWJmYjEwNTRjODU0In0._RjYIzLsA5cU-YM6dxGOLQ" 
-        }).addTo(map);
-    var geojsonMarkerOptions = {
-        radius: 8,
-        fillColor: "#FF0000",
-        color: "#000",
-        weight: 1,
-        opacity: 1,
-        fillOpacity: 0.8
-    };
-    /*
-    $.getJSON("data/casualties/casualties_2014.geo.json", function(data) {
-        /*L.geoJson(data, {
-            pointToLayer: function (feature, latlng) {
-                return L.circleMarker(latlng, geojsonMarkerOptions);
-            }
-        }).addTo(map);
-        accData = data.features.map(function(row, i) {
-            return new L.LatLng(row.geometry.coordinates[1], row.geometry.coordinates[0]);
         });
-        heatMap = L.heatLayer(accData, casualtyOptions).addTo(map);
-    });
-    */
+    baseLayer.addTo(map);
+    var baseLayers = [
+        {
+            active: true,
+            name: "OpenStreetMap",
+            layer: baseLayer
+        }
+    ];
+    var overLayers = [
+        {
+            name: "Accidents",
+            layer: null
+        },
+        {
+            name: "Accidents with Damage Weight",
+            layer: null
+        },
+        {
+            name: "Injuries and Fatalities",
+            layer: null
+        },
+        {
+            name: "Fatalities",
+            layer: null
+        }
+    ];
+
     var myStyle = {
         "color": "#000",
         "weight": 1,
@@ -59,52 +76,44 @@ var plot = function() {
         }).addTo(map);
     });
     $.getJSON("data/accidents/accidents_all_latlng.json", function(data) {
-        console.log(data);
+        accData = data;
+        overLayers[0].layer = accLayer = new L.heatLayer(accData[currYear].map(function(row) {
+            return [row[0], row[1]];
+        }), accidentOptions);
+        overLayers[1].layer = dmgLayer = new L.heatLayer(accData[currYear], damageOptions);
+
+        $.getJSON("data/casualties/casualties_all_latlng.json", function(data) {
+            casData = data;
+            overLayers[2].layer = casLayer = new L.heatLayer(casData[currYear].map(function(row) {
+                return [row[0], row[1]];
+            }), casualtyOptions);
+            overLayers[3].layer = fatLayer = new L.heatLayer(casData[currYear].filter(function(row) {
+                return row[2];
+            }), fatalityOptions);
+            
+            panelLayer = new L.Control.PanelLayers(baseLayers, overLayers).addTo(map);
+        });
     });
-    $.getJSON("data/casualties/casualties_all_latlng.json", function(data) {
-        console.log(data);
-    });
+
     map.fitBounds(bounds);
 };
 
-/*
-var switchData = function(type) {
-    if(type === "casualties") {
-        currType = type;
-        $("#casualties").addClass("active");
-        $("#accidents").removeClass("active");
-        if(casData) {
-            heatMap.setLatLngs(casData);
-            heatMap.setOptions(casualtyOptions);      
-        }
-        else {
-            $.getJSON("data/casualties/casualties_2014.geo.json", function(data) {
-                var heatPoints = data.features.map(function(row, i) {
-                    return new L.LatLng(row.geometry.coordinates[1], row.geometry.coordinates[0]);
-                });
-                casData = heatPoints;
-                heatMap.setLatLngs(heatPoints);
-                heatMap.setOptions(casualtyOptions);
-            });
-        }
+var switchYear = function(year) {
+    if(accData && casData && year in accData && year in casData) {
+        currYear = year;
+
+        accLayer.setLatLngs(accData[currYear].map(function(row) {
+            return [row[0], row[1]];
+        }));
+        dmgLayer.setLatLngs(accData[currYear]);
+        casLayer.setLatLngs(casData[currYear].map(function(row) {
+            return [row[0], row[1]];
+        }));
+        fatLayer.setLatLngs(casData[currYear].filter(function(row) {
+            return row[2];
+        }));
     }
-    else if(type === "accidents") {
-        currType = type;
-        $("#accidents").addClass("active");
-        $("#casualties").removeClass("active");
-        if(accData) {
-            heatMap.setLatLngs(accData);
-            heatMap.setOptions(casualtyOptions);
-        }
-        $.getJSON("data/accidents/accidents_2014.geo.json", function(data) {
-            var heatPoints = data.features.map(function(row, i) {
-                return new L.LatLng(row.geometry.coordinates[1], row.geometry.coordinates[0]);
-            });
-            accData = heatPoints;
-            heatMap.setLatLngs(heatPoints);
-            heatMap.setOptions(accidentOptions);
-        });
-    }
+    
 };
-*/
+
 $(document).ready(plot);
