@@ -11,6 +11,12 @@ html, body, .map {
     position: relative;
 }
 
+.year-value{
+    top: 15%;
+    left: 90%;
+    position: absolute;
+}
+
 .button_1 {
 	background-color:#b3bab5;
 	border-radius:6px;

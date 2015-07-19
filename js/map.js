@@ -11,9 +11,18 @@ var map, heatMap, currType = "casualties", casData, accData,
         gradient: {0.05: 'blue', 0.2: 'lime', 0.5: 'red'},
         maxZoom: 11
     };
+    
+var southWest = L.latLng(32.314308, -126.067097),
+    northEast = L.latLng(44.301400, -61.226309),
+    bounds = L.latLngBounds(southWest, northEast);
 
 var plot = function() {
-    var map = L.map("map").setView([39.0, -98], 5);
+    var map = L.map("map", {
+	    maxBounds: bounds,
+	    maxZoom: 10,
+	    minZoom: 5
+	});
+    map.setView([39.0, -98], 5);
     L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
         id: "cakesofwrath.5eddf8f1",
         accessToken: "pk.eyJ1IjoiY2FrZXNvZndyYXRoIiwiYSI6Ijk5YWI3OTlhMGIxN2I1OWYzYjhlOWJmYjEwNTRjODU0In0._RjYIzLsA5cU-YM6dxGOLQ" 
@@ -26,17 +35,19 @@ var plot = function() {
         opacity: 1,
         fillOpacity: 0.8
     };
+    /*
     $.getJSON("data/casualties/casualties_2014.geo.json", function(data) {
         /*L.geoJson(data, {
             pointToLayer: function (feature, latlng) {
                 return L.circleMarker(latlng, geojsonMarkerOptions);
             }
-        }).addTo(map);*/
+        }).addTo(map);
         accData = data.features.map(function(row, i) {
             return new L.LatLng(row.geometry.coordinates[1], row.geometry.coordinates[0]);
         });
         heatMap = L.heatLayer(accData, casualtyOptions).addTo(map);
     });
+    */
     var myStyle = {
         "color": "#000",
         "weight": 1,
@@ -53,9 +64,10 @@ var plot = function() {
     $.getJSON("data/casualties/casualties_all_latlng.json", function(data) {
         console.log(data);
     });
-    
+    map.fitBounds(bounds);
 };
 
+/*
 var switchData = function(type) {
     if(type === "casualties") {
         currType = type;
@@ -94,5 +106,5 @@ var switchData = function(type) {
         });
     }
 };
-
+*/
 $(document).ready(plot);
