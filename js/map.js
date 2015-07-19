@@ -53,8 +53,8 @@ var plot = function() {
 var switchData = function(type) {
     if(type === "casualties") {
         currType = type;
-        $("#casualties").addClass('.active');
-        $("#accidents").removeClass('.active');
+        $("#casualties").addClass("active");
+        $("#accidents").removeClass("active");
         $.getJSON("data/casualties.geo.json", function(data) {
             var heatPoints = data.features.map(function(row, i) {
                 return new L.LatLng(row.geometry.coordinates[1], row.geometry.coordinates[0]);
@@ -65,8 +65,8 @@ var switchData = function(type) {
     }
     else if(type === "accidents") {
         currType = type;
-        $("#accidents").addClass('.active');
-        $("#casualties").removeClass('.active');
+        $("#accidents").addClass("active");
+        $("#casualties").removeClass("active");
         $.getJSON("data/accidents.geo.json", function(data) {
             var heatPoints = data.features.map(function(row, i) {
                 return new L.LatLng(row.geometry.coordinates[1], row.geometry.coordinates[0]);
