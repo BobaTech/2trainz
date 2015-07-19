@@ -1,14 +1,14 @@
 "use strict";
 
-var map, heatMap, currType = "casualties",
+var map, heatMap, currType = "casualties", casData, accData,
     casualtyOptions = {
         radius: 25,
-        gradient: {0.05: 'blue', 0.2: 'lime', .5: 'red'},
+        gradient: {0.05: 'blue', 0.2: 'lime', 0.5: 'red'},
         maxZoom: 11
     },
     accidentOptions = {
         radius: 25,
-        gradient: {0.05: 'blue', 0.2: 'lime', .5: 'red'},
+        gradient: {0.05: 'blue', 0.2: 'lime', 0.5: 'red'},
         maxZoom: 11
     };
 
@@ -26,16 +26,16 @@ var plot = function() {
         opacity: 1,
         fillOpacity: 0.8
     };
-    $.getJSON("data/casualties.geo.json", function(data) {
+    $.getJSON("data/casualties/casualties_2014.geo.json", function(data) {
         /*L.geoJson(data, {
             pointToLayer: function (feature, latlng) {
                 return L.circleMarker(latlng, geojsonMarkerOptions);
             }
         }).addTo(map);*/
-        var heatPoints = data.features.map(function(row, i) {
+        accData = data.features.map(function(row, i) {
             return new L.LatLng(row.geometry.coordinates[1], row.geometry.coordinates[0]);
         });
-        heatMap = L.heatLayer(heatPoints, casualtyOptions).addTo(map);
+        heatMap = L.heatLayer(accData, casualtyOptions).addTo(map);
     });
     var myStyle = {
         "color": "#000",
@@ -47,6 +47,12 @@ var plot = function() {
             style: myStyle
         }).addTo(map);
     });
+    $.getJSON("data/accidents/accidents_all_latlng.json", function(data) {
+        console.log(data);
+    });
+    $.getJSON("data/casualties/casualties_all_latlng.json", function(data) {
+        console.log(data);
+    });
     
 };
 
@@ -55,22 +61,34 @@ var switchData = function(type) {
         currType = type;
         $("#casualties").addClass("active");
         $("#accidents").removeClass("active");
-        $.getJSON("data/casualties.geo.json", function(data) {
-            var heatPoints = data.features.map(function(row, i) {
-                return new L.LatLng(row.geometry.coordinates[1], row.geometry.coordinates[0]);
+        if(casData) {
+            heatMap.setLatLngs(casData);
+            heatMap.setOptions(casualtyOptions);      
+        }
+        else {
+            $.getJSON("data/casualties/casualties_2014.geo.json", function(data) {
+                var heatPoints = data.features.map(function(row, i) {
+                    return new L.LatLng(row.geometry.coordinates[1], row.geometry.coordinates[0]);
+                });
+                casData = heatPoints;
+                heatMap.setLatLngs(heatPoints);
+                heatMap.setOptions(casualtyOptions);
             });
-            heatMap.setLatLngs(heatPoints);
-            heatMap.setOptions(casualtyOptions);
-        });
+        }
     }
     else if(type === "accidents") {
         currType = type;
         $("#accidents").addClass("active");
         $("#casualties").removeClass("active");
-        $.getJSON("data/accidents.geo.json", function(data) {
+        if(accData) {
+            heatMap.setLatLngs(accData);
+            heatMap.setOptions(casualtyOptions);
+        }
+        $.getJSON("data/accidents/accidents_2014.geo.json", function(data) {
             var heatPoints = data.features.map(function(row, i) {
                 return new L.LatLng(row.geometry.coordinates[1], row.geometry.coordinates[0]);
             });
+            accData = heatPoints;
             heatMap.setLatLngs(heatPoints);
             heatMap.setOptions(accidentOptions);
         });
