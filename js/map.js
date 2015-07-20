@@ -17,7 +17,7 @@ var map, heatMap, interval, casData, accData, baseLayer, panelLayer, accLayer, c
     },
     damageOptions = {
         "radius": 25,
-        "maxZoom": 11,
+        "maxZoom": 9,
         "gradient": {0.4: "blue", 0.65: "lime", 1: "red"} 
     },
     fatalityOptions = {
@@ -84,16 +84,8 @@ var plot = function() {
             return [row[0], row[1]];
         }), accidentOptions);
         overLayers[1].layer = dmgLayer = new L.heatLayer(accData[currYear].map(function(row) {
-            return [row[0], row[1], (parseInt(row[2]) / 145359.13510178903).toString()]; // that's the avg
+            return [row[0], row[1], ((parseInt(row[2]) / 145359.13510178903)/2).toString()]; // that's the avg
         }), damageOptions);
-        var sum = 0, ct = 0;
-        for(var y in accData) {
-            for(var i=0; i<accData[y].length; i++) {
-                sum += parseInt(accData[y][i][2]);
-                ct++;
-            }
-        }
-        console.log(sum / ct);
 
         $.getJSON("data/casualties/casualties_all_latlng.json", function(data) {
             casData = data;
