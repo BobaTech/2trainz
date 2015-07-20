@@ -6,22 +6,22 @@ var map, heatMap, interval, casData, accData, baseLayer, panelLayer, accLayer, c
     currYear = "2011",
     playYear = "2011",
     accidentOptions = {
-        "radius": 25,
+        "radius": 15,
         "maxZoom": 9,
         "gradient": {0.4: "blue", 0.65: "lime", 1: "red"} 
     },
     casualtyOptions = {
-        "radius": 25,
+        "radius": 15,
         "maxZoom": 9,
         "gradient": {0.4: "blue", 0.65: "lime", 1: "red"}       
     },
     damageOptions = {
-        "radius": 25,
+        "radius": 15,
         "maxZoom": 9,
         "gradient": {0.3: "blue", 0.5: "lime", 0.7: "red"} 
     },
     fatalityOptions = {
-        "radius": 25,
+        "radius": 15,
         "maxZoom": 9,
         "gradient": {0.2: "blue", 0.325: "lime", .5: "red"}
     };
@@ -57,7 +57,8 @@ var plot = function() {
     var overLayers = [
         {
             name: "Accidents",
-            layer: null
+            layer: null,
+            active: true
         },
         {
             name: "Accidents with Damage Weight",
