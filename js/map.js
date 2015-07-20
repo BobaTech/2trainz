@@ -7,23 +7,23 @@ var map, heatMap, interval, casData, accData, baseLayer, panelLayer, accLayer, c
     playYear = "2011",
     accidentOptions = {
         "radius": 25,
-        "maxZoom": 11,
+        "maxZoom": 9,
         "gradient": {0.4: "blue", 0.65: "lime", 1: "red"} 
     },
     casualtyOptions = {
         "radius": 25,
-        "maxZoom": 11,
+        "maxZoom": 9,
         "gradient": {0.4: "blue", 0.65: "lime", 1: "red"}       
     },
     damageOptions = {
         "radius": 25,
         "maxZoom": 9,
-        "gradient": {0.4: "blue", 0.65: "lime", 1: "red"} 
+        "gradient": {0.3: "blue", 0.5: "lime", 0.7: "red"} 
     },
     fatalityOptions = {
         "radius": 25,
         "maxZoom": 9,
-        "gradient": {0.1: "blue", 0.2: "lime", 0.3: "red"} 
+        "gradient": {0.2: "blue", 0.325: "lime", .5: "red"}
     };
     
 var southWest = new L.latLng(23.314308, -126.067097),
@@ -31,6 +31,11 @@ var southWest = new L.latLng(23.314308, -126.067097),
     bounds = new L.latLngBounds(southWest, northEast);
 
 var plot = function() {
+    var over = "<div id=\"overlay\">" +
+        "<div class=\"loading\"></div>" +
+        "</div>";
+    $(over).appendTo("body");
+
     var map = new L.map("map", {
 	    maxBounds: bounds,
 	    maxZoom: 10,
@@ -73,11 +78,7 @@ var plot = function() {
         "weight": 1,
         "opacity": 0.65
     };
-    $.getJSON("data/us-railroads-10m.json", function(data) {
-        L.geoJson(data, {
-            style: myStyle
-        }).addTo(map);
-    });
+    
     $.getJSON("data/accidents/accidents_all_latlng.json", function(data) {
         accData = data;
         overLayers[0].layer = accLayer = new L.heatLayer(accData[currYear].map(function(row) {
@@ -97,6 +98,13 @@ var plot = function() {
             }), fatalityOptions);
             
             panelLayer = new L.Control.PanelLayers(baseLayers, overLayers).addTo(map);
+            
+            $.getJSON("data/us-railroads-10m.json", function(data) {
+                L.geoJson(data, {
+                    style: myStyle
+                }).addTo(map);
+                $("#overlay").remove();
+            });
         });
     });
 
@@ -120,6 +128,7 @@ var plot = function() {
         }
         else {
             playYear = "2011";
+            switchYear(playYear);
             $(".year").removeClass("active");
             $("#y2011").addClass("active"); // manually cuz I'm too lazy to debug
             interval = setInterval(function() {
@@ -151,7 +160,9 @@ var switchYear = function(year) {
 		accLayer.setLatLngs(accData[currYear].map(function(row) {
 		    return [row[0], row[1]];
 		}));
-		dmgLayer.setLatLngs(accData[currYear]);
+		dmgLayer.setLatLngs(accData[currYear].map(function(row) {
+            return [row[0], row[1], ((parseInt(row[2]) / 145359.13510178903)/2).toString()]; // that's the avg
+        }));
 		casLayer.setLatLngs(casData[currYear].map(function(row) {
 		    return [row[0], row[1]];
 		}));
