@@ -1,82 +1,178 @@
 "use strict";
 
+// jshint undef:false
 
-var initialize = function() {
-	var minZoomLevel = 5;
-    var mapOptions = {
-        center: { lat: 39.0, lng: -98 },
-        zoom: minZoomLevel
+var map, heatMap, interval, casData, accData, baseLayer, panelLayer, accLayer, casLayer, dmgLayer, fatLayer,
+    currYear = "2011",
+    playYear = "2011",
+    accidentOptions = {
+        "radius": 25,
+        "maxZoom": 11,
+        "gradient": {0.4: "blue", 0.65: "lime", 1: "red"} 
+    },
+    casualtyOptions = {
+        "radius": 25,
+        "maxZoom": 11,
+        "gradient": {0.4: "blue", 0.65: "lime", 1: "red"}       
+    },
+    damageOptions = {
+        "radius": 25,
+        "maxZoom": 9,
+        "gradient": {0.4: "blue", 0.65: "lime", 1: "red"} 
+    },
+    fatalityOptions = {
+        "radius": 25,
+        "maxZoom": 9,
+        "gradient": {0.1: "blue", 0.2: "lime", 0.3: "red"} 
     };
-    var map = new google.maps.Map(document.getElementById("map"), mapOptions);
-    map.data.loadGeoJson("data/us-railroads-10m.json");
-    var point = new Array();
-    $.getJSON("data/casualties.geo.json", function(data) {
-    	//alert(point[0]);
-        var heatPoint = data.features.map(function(row, i) {
-            point.push(new google.maps.LatLng(row.geometry.coordinates[1], row.geometry.coordinates[0]));
-            //alert(point)
-        });
-        //alert(point);
-        var pointArray = new google.maps.MVCArray(point);
-        var heatmap = new google.maps.visualization.HeatmapLayer({
-            data: pointArray
-        });
-        heatmap.setMap(map);
-	});
-        //var markerCluster = new MarkerClusterer(map, plotData);
-
     
-    /*$.getJSON("data/us-railroads-10m.json", function(us){
-		geoJsonObject = topojson.feature(us, us.object.railroads);
-		map.data.addGeoJson(geoJsonObject); 
-	}); */
-    
-    var allowedBounds = new google.maps.LatLngBounds(
-	    new google.maps.LatLng(32.314308, -126.067097), 
-	    new google.maps.LatLng(44.301400, -70.226309)
-	);
-	
-	google.maps.event.addListener(map, 'drag', function() {
-	    if (allowedBounds.contains(map.getCenter())){
-	    	return;
-	    } 
-	    var center = map.getCenter(),
-	        x = center.lng(),
-	        y = center.lat(),
-	        maxX = allowedBounds.getNorthEast().lng(),
-	        maxY = allowedBounds.getNorthEast().lat(),
-	        minX = allowedBounds.getSouthWest().lng(),
-	        minY = allowedBounds.getSouthWest().lat();
-	
-	    if (x < minX){
-	    	x = minX;
-	    }
-	    if (x > maxX){
-	    	x = maxX;	
-	    } 
-	    if (y < minY){
-	    	y = minY;
-	    } 
-	    if (y > maxY){ 
-	    	y = maxY;
-	    }
-	    map.setCenter(new google.maps.LatLng(y, x));
-	});
-	
-	google.maps.event.addListener(map, 'zoom_changed', function() {
-	   if (map.getZoom() < minZoomLevel){
-	   	   map.setZoom(minZoomLevel);
-	   } 
-	});
+var southWest = new L.latLng(32.314308, -126.067097),
+    northEast = new L.latLng(44.301400, -61.226309),
+    bounds = new L.latLngBounds(southWest, northEast);
 
-    google.maps.visualRefresh = false;
+var plot = function() {
+    var map = new L.map("map", {
+	    maxBounds: bounds,
+	    maxZoom: 10,
+	    minZoom: 5
+	});
+    map.setView([39.0, -98], 5);
+    baseLayer = new L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
+        id: "cakesofwrath.5eddf8f1",
+        accessToken: "pk.eyJ1IjoiY2FrZXNvZndyYXRoIiwiYSI6Ijk5YWI3OTlhMGIxN2I1OWYzYjhlOWJmYjEwNTRjODU0In0._RjYIzLsA5cU-YM6dxGOLQ" 
+        });
+    baseLayer.addTo(map);
+    var baseLayers = [
+        {
+            active: true,
+            name: "OpenStreetMap",
+            layer: baseLayer
+        }
+    ];
+    var overLayers = [
+        {
+            name: "Accidents",
+            layer: null
+        },
+        {
+            name: "Accidents with Damage Weight",
+            layer: null
+        },
+        {
+            name: "Injuries and Fatalities",
+            layer: null
+        },
+        {
+            name: "Fatalities",
+            layer: null
+        }
+    ];
+
+    var myStyle = {
+        "color": "#000",
+        "weight": 1,
+        "opacity": 0.65
+    };
+    /*$.getJSON("data/us-railroads-10m.json", function(data) {
+        L.geoJson(data, {
+            style: myStyle
+        }).addTo(map);
+    });*/
+    $.getJSON("data/accidents/accidents_all_latlng.json", function(data) {
+        accData = data;
+        overLayers[0].layer = accLayer = new L.heatLayer(accData[currYear].map(function(row) {
+            return [row[0], row[1]];
+        }), accidentOptions);
+        overLayers[1].layer = dmgLayer = new L.heatLayer(accData[currYear].map(function(row) {
+            return [row[0], row[1], ((parseInt(row[2]) / 145359.13510178903)/2).toString()]; // that's the avg
+        }), damageOptions);
+
+        $.getJSON("data/casualties/casualties_all_latlng.json", function(data) {
+            casData = data;
+            overLayers[2].layer = casLayer = new L.heatLayer(casData[currYear].map(function(row) {
+                return [row[0], row[1]];
+            }), casualtyOptions);
+            overLayers[3].layer = fatLayer = new L.heatLayer(casData[currYear].filter(function(row) {
+                return row[2];
+            }), fatalityOptions);
+            
+            panelLayer = new L.Control.PanelLayers(baseLayers, overLayers).addTo(map);
+        });
+    });
+
+    map.fitBounds(bounds);
+
+    $(".year").click(function(e) {
+        $("#y" + currYear).removeClass("active");
+        if(interval) {
+            clearInterval(interval);
+            $("#play").removeClass("active");
+            interval = null;
+        }
+        switchYear($(this).attr("id").substring(1));
+    });
+
+    $("#play").click(function() {
+        $(this).toggleClass("active");
+        if(interval) {
+            clearInterval(interval);
+            interval = null;
+        }
+        else {
+            playYear = "2011";
+            $(".year").removeClass("active");
+            $("#y2011").addClass("active"); // manually cuz I'm too lazy to debug
+            interval = setInterval(function() {
+                if(parseInt(playYear) > 2014) {
+                    clearInterval(interval);
+                    interval = null;
+                    $("#play").removeClass("active");
+                    switchYear("2014");
+                }
+                else {
+                    if(playYear !== "2014") { // so it stays 2014 in the end
+                        $("#y" + playYear).removeClass("active");
+                    }
+                    playYear = (parseInt(playYear) + 1).toString();
+                    switchYear(playYear);
+                }
+            }, 2100);
+        }
+        return false;
+    });
 };
 
-$(document).ready(function() {
-    google.maps.event.addDomListener(window, "load", initialize);
-});
+var switchYear = function(year) {
+    // $(".year").removeClass("active");
+    $("#y" + year).addClass("active");
+	currYear = year;
+
+	if(accData && casData && year in accData && year in casData) {
+		accLayer.setLatLngs(accData[currYear].map(function(row) {
+		    return [row[0], row[1]];
+		}));
+		dmgLayer.setLatLngs(accData[currYear]);
+		casLayer.setLatLngs(casData[currYear].map(function(row) {
+		    return [row[0], row[1]];
+		}));
+		fatLayer.setLatLngs(casData[currYear].filter(function(row) { // yay for map and filter
+		    return row[2];
+		 }));
+	}
+};
 
 
 
-      
+/*var intervalOn = function(){
+	interval = setInterval(switchYear, 3000);
+	$("#play").addClass("active");
+	$("#pause").removeClass("active");
+};
 
+var intervalOff = function(){
+	clearInterval(interval);
+	$("#play").removeClass("active");
+	$("#pause").addClass("active");
+};*/
+
+$(document).ready(plot);

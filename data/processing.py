@@ -3,11 +3,11 @@
 """
 
 import pandas as pd
-import json
+import simplejson
 
 def save_obj(o, f_name):
     with open(f_name, "w+") as of:
-        json.dump(o, of, allow_nan=False)
+        simplejson.dump(o, of, ignore_nan=True)
 
 acc = pd.read_csv("./accidents_2014.txt")
 cas = pd.read_csv("./casualties_2014.txt")
