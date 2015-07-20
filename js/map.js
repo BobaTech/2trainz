@@ -1,6 +1,6 @@
 "use strict";
 
-var map, heatMap, casData, accData, baseLayer, panelLayer, accLayer, casLayer, dmgLayer, fatLayer,
+var map, heatMap, interval, casData, accData, baseLayer, panelLayer, accLayer, casLayer, dmgLayer, fatLayer,
     currYear = "2014",
     accidentOptions = {
         "radius": 25,
@@ -120,8 +120,8 @@ var switchYear = function() {
 	currYear++;
 }
 
-var interval = function(){
-	setInterval(switchYear, 3000);
+var intervalOn = function(){
+	interval = setInterval(switchYear, 3000);
 	$("#play").addClass("active");
 	$("#pause").removeClass("active");
 }
