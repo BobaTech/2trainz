@@ -3,6 +3,7 @@ html, body, .map {
     width: 100%;
     margin: 0;
     padding: 0;
+    font-family: "Josefin-Sans", Tahoma, Geneva, sans-serif;
 }
 
 #map-wrapper {
@@ -11,46 +12,93 @@ html, body, .map {
     position: relative;
 }
 
-.year-value{
-    top: 15%;
-    left: 90%;
+.yearControl {
+    z-index: 4;
+    background-color: #b3bab5;
+    opacity: 0.9;
+    color: white;
     position: absolute;
+    margin: 0 auto;
+    left: 0;
+    right: 0;
+    bottom: 3%;
+    width: 40%;
+    text-align: center;
+    font-size: 2rem;
+    height: 10%;
+    padding: 0 5%;
+    display:table;
 }
 
-.button_1 {
-	background-color:#b3bab5;
-	border-radius:6px;
-	border:1px solid #bcc2bd;
-	cursor:pointer;
-	color:#ffffff;
-	padding:16px 31px;
-	top: 95%;
-	left: 0%;
-	position: absolute;
-	z-index: 9001;
+.yearControl span {
+    display:table-cell; /* god css why is it so difficult to center */
+    vertical-align:middle;
 }
 
-.button_2 {
-	background-color:#b3bab5;
-	border-radius:6px;
-	border:1px solid #bcc2bd;
-	cursor:pointer;
-	color:#ffffff;
-	padding:16px 31px;
-	top: 95%;
-	left: 8%;
-	position: absolute;
-	z-index: 9001;
-}
-
-.button_1:hover {
-	background-color:#b4c2ad;
-}
-
-.button_2:hover {
-	background-color:#b4c2ad;
+.year {
+    color: #333;
+    text-decoration: none;
 }
 
 .active {
-	border: 2px solid #000000;
+    color: #fff;
 }
+
+/* credit http://codepen.io/stevenfabre/pen/DvBei */
+.play {
+  display: block;
+  width: 0;
+  height: 0;
+  border-top: 13px solid transparent;
+  border-bottom: 13px solid transparent;
+  border-left: 15.6px solid #333;
+  margin: auto;
+  position: relative;
+  z-index: 1;
+  transition: all 0.3s;
+  -webkit-transition: all 0.3s;
+  -moz-transition: all 0.3s;
+  left: 2.6px;
+}
+.play:before {
+  content: '';
+  position: absolute;
+  top: -19.5px;
+  left: -29.9px;
+  bottom: -19.5px;
+  right: -9.1px;
+  border-radius: 50%;
+  border: 2.6px solid #333;
+  z-index: 2;
+  transition: all 0.3s;
+  -webkit-transition: all 0.3s;
+  -moz-transition: all 0.3s;
+}
+.play:after {
+  content: '';
+  opacity: 0;
+  transition: opacity 0.6s;
+  -webkit-transition: opacity 0.6s;
+  -moz-transition: opacity 0.6s;
+}
+.play:hover:before, .play:focus:before {
+  transform: scale(1.1);
+  -webkit-transform: scale(1.1);
+  -moz-transform: scale(1.1);
+}
+.play.active {
+  border-color: transparent;
+}
+.play.active:after {
+  content: '';
+  opacity: 1;
+  width: 13px;
+  height: 20.8px;
+  background: #333;
+  position: absolute;
+  right: 1.3px;
+  top: -10.4px;
+  border-left: 5.2px solid #333;
+  box-shadow: inset 7.8px 0 0 0 #b3bab5;
+}
+
