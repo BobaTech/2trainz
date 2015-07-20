@@ -2,20 +2,42 @@
 <html lang="en">
     <head>
         <title>Railroads</title>
-         <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
-         <link rel="stylesheet" href="dependencies/leaflet-panel-layers.min.css" />
+        <link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
+        <link rel="stylesheet" type="text/css" href="dependencies/leaflet-panel-layers.min.css" />
+        <link href="http://fonts.googleapis.com/css?family=Droid+Sans:400,700" rel='stylesheet' type='text/css'>
         <link rel="stylesheet" type="text/css" href="css/styles.css">
     </head>
     <body>
 		<div id="map-wrapper">
 	        <div id="map" class="map"></div>
-	        <!-- <div id="button-wrapper">
-	            <input type="button" id="accidents" value="Accidents" onclick="switchData(this.id)" class="button_1">
-	            <input type="button" id="casualties" value="Casualties" onclick="switchData(this.id)" class="button_2 active"/>
-	        </div>  -->
 		</div>
 		
-		
+        <div id="yearControl" class="yearControl">
+            <span><a href="#" title="Play" class="play" id="play"></a></span>
+            <span><a href="#" id="y2011" class="year active">2011</a></span>
+            <span><a href="#" id="y2012" class="year">2012</a></span>
+            <span><a href="#" id="y2013" class="year">2013</a></span>
+            <span><a href="#" id="y2014" class="year">2014</a></span>
+            <span><a href="#modal-one" class='icon info'></a></span>
+        </div>
+		<div class="modal" id="modal-one">
+            <div class="modal-dialog">
+                <div class="modal-header">
+                    <h2>2Trainz</h2>
+                    <a href="#close" class="btn-close" aria-hidden="true">×</a> <!--CHANGED TO "#close"-->
+                </div>
+                <div class="modal-body">
+                    <p>This is a visualization of data from the <a href="http://safetydata.fra.dot.gov/OfficeofSafety/Default.aspx">Federal Railroad Administration Office of Safety Analysis</a>.</p>
+                    <p>Specifically, accidents and casualties data is plotted. <b>Accidents with Damage Weight</b> takes into account how many dollars damage each accident caused.</p>
+                    <p>Only data from 2011 to 2014 is available, as the FRAOSA only began recording latitude/longitude in 2011.</p>
+                    <p>Hit the play button to view progression throughout the years.</p>
+                    <p>Created by <a href="https://github.com/KwaiWan">a couple high schoolers</a>. You can view the <a href="https://github.com/KwaiWan/2trainz"> source code here</a>. Our name sucks, we know.</p>
+                </div>
+                <div class="modal-footer">
+                    <a href="#close" class="btn">All aboard!</a>  
+                </div>
+            </div>
+        </div>
 		<script src="http://d3js.org/topojson.v1.min.js"></script>
         <script type="text/javascript" src="dependencies/jquery-1.11.3.js"></script>
         <!-- <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=visualization"></script> -->

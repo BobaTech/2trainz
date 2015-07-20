@@ -1,7 +1,10 @@
 "use strict";
 
-var map, heatMap, casData, accData, baseLayer, panelLayer, accLayer, casLayer, dmgLayer, fatLayer,
-    currYear = "2014",
+// jshint undef:false
+
+var map, heatMap, interval, casData, accData, baseLayer, panelLayer, accLayer, casLayer, dmgLayer, fatLayer,
+    currYear = "2011",
+    playYear = "2011",
     accidentOptions = {
         "radius": 25,
         "maxZoom": 11,
@@ -14,13 +17,13 @@ var map, heatMap, casData, accData, baseLayer, panelLayer, accLayer, casLayer, d
     },
     damageOptions = {
         "radius": 25,
-        "maxZoom": 11,
+        "maxZoom": 9,
         "gradient": {0.4: "blue", 0.65: "lime", 1: "red"} 
     },
     fatalityOptions = {
         "radius": 25,
-        "maxZoom": 11,
-        "gradient": {0.4: "blue", 0.65: "lime", 1: "red"} 
+        "maxZoom": 9,
+        "gradient": {0.1: "blue", 0.2: "lime", 0.3: "red"} 
     };
     
 var southWest = new L.latLng(32.314308, -126.067097),
@@ -70,17 +73,19 @@ var plot = function() {
         "weight": 1,
         "opacity": 0.65
     };
-    $.getJSON("data/us-railroads-10m.json", function(data) {
+    /*$.getJSON("data/us-railroads-10m.json", function(data) {
         L.geoJson(data, {
             style: myStyle
         }).addTo(map);
-    });
+    });*/
     $.getJSON("data/accidents/accidents_all_latlng.json", function(data) {
         accData = data;
         overLayers[0].layer = accLayer = new L.heatLayer(accData[currYear].map(function(row) {
             return [row[0], row[1]];
         }), accidentOptions);
-        overLayers[1].layer = dmgLayer = new L.heatLayer(accData[currYear], damageOptions);
+        overLayers[1].layer = dmgLayer = new L.heatLayer(accData[currYear].map(function(row) {
+            return [row[0], row[1], ((parseInt(row[2]) / 145359.13510178903)/2).toString()]; // that's the avg
+        }), damageOptions);
 
         $.getJSON("data/casualties/casualties_all_latlng.json", function(data) {
             casData = data;
@@ -96,24 +101,78 @@ var plot = function() {
     });
 
     map.fitBounds(bounds);
+
+    $(".year").click(function(e) {
+        $("#y" + currYear).removeClass("active");
+        if(interval) {
+            clearInterval(interval);
+            $("#play").removeClass("active");
+            interval = null;
+        }
+        switchYear($(this).attr("id").substring(1));
+    });
+
+    $("#play").click(function() {
+        $(this).toggleClass("active");
+        if(interval) {
+            clearInterval(interval);
+            interval = null;
+        }
+        else {
+            playYear = "2011";
+            $(".year").removeClass("active");
+            $("#y2011").addClass("active"); // manually cuz I'm too lazy to debug
+            interval = setInterval(function() {
+                if(parseInt(playYear) > 2014) {
+                    clearInterval(interval);
+                    interval = null;
+                    $("#play").removeClass("active");
+                    switchYear("2014");
+                }
+                else {
+                    if(playYear !== "2014") { // so it stays 2014 in the end
+                        $("#y" + playYear).removeClass("active");
+                    }
+                    playYear = (parseInt(playYear) + 1).toString();
+                    switchYear(playYear);
+                }
+            }, 2100);
+        }
+        return false;
+    });
 };
 
 var switchYear = function(year) {
-    if(accData && casData && year in accData && year in casData) {
-        currYear = year;
+    // $(".year").removeClass("active");
+    $("#y" + year).addClass("active");
+	currYear = year;
 
-        accLayer.setLatLngs(accData[currYear].map(function(row) {
-            return [row[0], row[1]];
-        }));
-        dmgLayer.setLatLngs(accData[currYear]);
-        casLayer.setLatLngs(casData[currYear].map(function(row) {
-            return [row[0], row[1]];
-        }));
-        fatLayer.setLatLngs(casData[currYear].filter(function(row) {
-            return row[2];
-        }));
-    }
-    
+	if(accData && casData && year in accData && year in casData) {
+		accLayer.setLatLngs(accData[currYear].map(function(row) {
+		    return [row[0], row[1]];
+		}));
+		dmgLayer.setLatLngs(accData[currYear]);
+		casLayer.setLatLngs(casData[currYear].map(function(row) {
+		    return [row[0], row[1]];
+		}));
+		fatLayer.setLatLngs(casData[currYear].filter(function(row) { // yay for map and filter
+		    return row[2];
+		 }));
+	}
 };
+
+
+
+/*var intervalOn = function(){
+	interval = setInterval(switchYear, 3000);
+	$("#play").addClass("active");
+	$("#pause").removeClass("active");
+};
+
+var intervalOff = function(){
+	clearInterval(interval);
+	$("#play").removeClass("active");
+	$("#pause").addClass("active");
+};*/
 
 $(document).ready(plot);
