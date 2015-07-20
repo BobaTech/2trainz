@@ -38,14 +38,22 @@ html, body, .map {
 .year {
     color: #333;
     text-decoration: none;
+    -webkit-transition: color .5s linear; 
+    -moz-transition: color .5s linear; 
+    -ms-transition: color .5s linear; 
+    transition: color .5s linear;
 }
 
 .year:hover {
-  color: #fff;
+    color: #fff;
 }
 
 .active {
     color: #fff;
+    -webkit-transition: color .5s linear; 
+    -moz-transition: color .5s linear; 
+    -ms-transition: color .5s linear; 
+    transition: color .5s linear;
 }
 
 /* credit http://codepen.io/stevenfabre/pen/DvBei */

@@ -26,8 +26,8 @@ var map, heatMap, interval, casData, accData, baseLayer, panelLayer, accLayer, c
         "gradient": {0.1: "blue", 0.2: "lime", 0.3: "red"} 
     };
     
-var southWest = new L.latLng(32.314308, -126.067097),
-    northEast = new L.latLng(44.301400, -61.226309),
+var southWest = new L.latLng(23.314308, -126.067097),
+    northEast = new L.latLng(48.301400, -61.226309),
     bounds = new L.latLngBounds(southWest, northEast);
 
 var plot = function() {
@@ -73,11 +73,11 @@ var plot = function() {
         "weight": 1,
         "opacity": 0.65
     };
-    /*$.getJSON("data/us-railroads-10m.json", function(data) {
+    $.getJSON("data/us-railroads-10m.json", function(data) {
         L.geoJson(data, {
             style: myStyle
         }).addTo(map);
-    });*/
+    });
     $.getJSON("data/accidents/accidents_all_latlng.json", function(data) {
         accData = data;
         overLayers[0].layer = accLayer = new L.heatLayer(accData[currYear].map(function(row) {
